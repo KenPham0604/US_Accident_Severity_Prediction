@@ -1,0 +1,129 @@
+data:
+  path: data/processed/US_Accidents_processed_remove_Distance.csv
+  csv_member: null
+  combine_existing_splits: false
+  target: Severity
+  required_severity_levels:
+  - 1
+  - 2
+  - 3
+  - 4
+experiment:
+  seeds:
+  - 42
+  - 123
+  - 2026
+  - 3407
+  - 777
+  split:
+    train: 0.64
+    validation: 0.16
+    test: 0.2
+  use_class_weight: true
+  class_weight_cap: 2.5
+  threshold_beta: 1.0
+  high_cardinality_cutoff: 50
+  target_encoding_folds: 5
+  predict_batch_size: 100000
+  cpu_threads: null
+compute:
+  lightgbm_device: auto
+  xgboost_device: cuda:0
+  catboost_device: GPU
+  catboost_devices: '0'
+outputs:
+  root: null
+  save_shap: false
+  shap_background_rows: 50
+  shap_explain_rows: 100
+  save_models: false
+  save_test_predictions: true
+  save_test_probabilities: true
+  save_split_indices: true
+models:
+  LogisticRegression:
+    C: 1.0
+    solver: lbfgs
+    max_iter: 1000
+  RandomForest:
+    n_estimators: 200
+    max_depth: 24
+    max_features: 0.5
+    min_samples_leaf: 7
+    min_samples_split: 2
+    criterion: gini
+    bootstrap: true
+    max_samples: null
+    class_weight: null
+  XGBoost:
+    n_estimators: 1000
+    learning_rate: 0.05
+    max_depth: 6
+    min_child_weight: 5
+    subsample: 0.8
+    colsample_bytree: 0.8
+    max_bin: 128
+    tree_method: hist
+    objective: multi:softprob
+    eval_metric: mlogloss
+  LightGBM:
+    n_estimators: 1000
+    learning_rate: 0.05
+    num_leaves: 31
+    min_child_samples: 50
+    colsample_bytree: 0.8
+    max_bin: 63
+    objective: multiclass
+  CatBoost:
+    iterations: 1000
+    learning_rate: 0.05
+    depth: 6
+    l2_leaf_reg: 3
+    border_count: 128
+    loss_function: MultiClass
+    eval_metric: MultiClass
+    boosting_type: Plain
+
+deep_learning:
+  # The DL pipeline trains these two models only.
+  models:
+  - MLP_Embeddings
+  - TabNet
+  min_category_count: 2
+  max_categories_per_column: 50000
+  max_epochs: 100
+  early_stopping_patience: 15
+  num_workers: 0
+  require_gpu: true
+  use_two_gpus: false
+  save_models: false
+  save_split_indices: true
+  save_test_predictions: true
+  save_test_probabilities: true
+  save_shap: false
+  shap_background_rows: 50
+  shap_explain_rows: 100
+  inference_batch_size: 100000
+  gradient_clip_norm: 1.0
+  tabnet_verbose: 1
+  model_params:
+    MLP_Embeddings:
+      hidden_dims:
+      - 512
+      - 256
+      dropout: 0.2
+      max_embedding_dim: 32
+      lr: 0.001
+      weight_decay: 0.0001
+      batch_size: 2048
+    TabNet:
+      n_d: 32
+      n_a: 32
+      n_steps: 5
+      gamma: 1.5
+      cat_emb_dim: 8
+      lambda_sparse: 0.0001
+      lr: 0.001
+      weight_decay: 0.0001
+      batch_size: 4096
+      virtual_batch_size: 512
